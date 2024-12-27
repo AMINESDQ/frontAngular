@@ -1,0 +1,30 @@
+<div class="p-3">
+  <div class="card-body">
+    <h3>Customers Component</h3>
+    <div class="row ">
+      <div class="col-md-6">
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+              <th>Account ID</th>
+              <th>Account balance</th>
+              <th>Account Type</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let customer of accounts | async">
+              <td>{{ customer.id }}</td>
+              <td>{{ customer.balance }}</td>
+              <td>{{ customer.type }}</td>
+
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

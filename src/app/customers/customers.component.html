@@ -1,0 +1,48 @@
+<div class="p-3">
+  <div class="card-body">
+    <h3>Customers Component</h3>
+    <div class="table ">
+      <div *ngIf="searchFormGroup">
+        <form [formGroup]="searchFormGroup" (ngSubmit)="handleSearchCustomers()">
+          <div class="input-group">
+            <label class="input-group-text">Keyword :</label>
+            <input type="text" formControlName="keyword" class="form-control">
+            <button class="btn btn-info">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+      <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Customer Name</th>
+          <th>Customer Email</th>
+          <th *ngIf="authService.roles.includes('ADMIN')">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let customer of customers | async">
+          <td>{{ customer.id }}</td>
+          <td>{{ customer.name }}</td>
+          <td>{{ customer.email }}</td>
+          <td class="" *ngIf="authService.roles.includes('ADMIN')">
+           <button class="btn btn-danger col col-md-3 m-2" (click)="handleDeleteCustomer(customer)" >
+             <i class="bi bi-trash"></i>
+           </button>
+            <button class="btn btn-success col-md-3 m-2" (click)="goToAccounts(customer)">
+              <i class="bi bi-bank"></i>
+            </button>
+            <button  class="btn btn-primary col-md-3 m-2"  (click)="goToEdit(customer)">
+              <i class="bi bi-pencil"></i>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+
+  </div>
+</div>

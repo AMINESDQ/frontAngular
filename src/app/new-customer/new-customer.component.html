@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+
+      <div class=" mt-3">
+        <div class=" ">
+
+          <div class="row ">
+            <div class="col border p-2 rounded">
+              <form [formGroup]="customerForm" (ngSubmit)="handleSaveCustomer()">
+            <span class="text-danger"
+                  *ngIf="customerForm.controls['name'].touched
+                && customerForm.controls['name'].errors
+                && customerForm.controls['name'].errors!['required']">
+            Name is Required
+          </span>
+                <span class="text-danger"
+                      *ngIf="customerForm.controls['name'].touched
+                && customerForm.controls['name'].errors
+                &&  customerForm.controls['name'].errors!['minlength']">
+            Name is Required
+          </span>
+                <div class="mb-3">
+                  <label class="form-label ">Name</label>
+                  <input class="form-control w-100" formControlName="name">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input class="form-control" formControlName="email">
+                  <span class="text-danger"
+                        *ngIf="customerForm.controls['email'].touched
+                && customerForm.controls['email'].errors
+                && customerForm.controls['email'].errors!['email']">
+            Email is not valid
+          </span>
+                </div>
+                <div class="row px-5">
+                  <button [disabled]="!customerForm.valid"  class="btn btn-success " type="submit">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
