@@ -1,0 +1,56 @@
+/* Animation pour le dropdown */
+.animate {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+  }
+  
+  @keyframes slideIn {
+    0% {
+      transform: translateY(1rem);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0rem);
+      opacity: 1;
+    }
+  }
+  
+  .slideIn {
+    animation-name: slideIn;
+  }
+  
+  /* Hover effects */
+  .navbar-nav .nav-link {
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  
+  .navbar-nav .nav-link:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: white;
+    transition: width 0.3s ease;
+  }
+  
+  .navbar-nav .nav-link:hover:after {
+    width: 100%;
+  }
+  
+  /* Button hover effect */
+  .btn-light {
+    transition: all 0.3s ease;
+  }
+  
+  .btn-light:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  /* Active link */
+  .navbar-nav .nav-link.active {
+    font-weight: 500;
+  }

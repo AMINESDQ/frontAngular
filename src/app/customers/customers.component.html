@@ -1,48 +1,90 @@
-<div class="p-3">
-  <div class="card-body">
-    <h3>Customers Component</h3>
-    <div class="table ">
-      <div *ngIf="searchFormGroup">
+<div class="container-fluid p-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+      <h3 class="card-title mb-0">Customers Management</h3>
+      <button class="btn btn-primary" *ngIf="authService.roles.includes('ADMIN')" routerLink="/admin/new-customer">
+        <i class="bi bi-person-plus me-2"></i>Add New Customer
+      </button>
+    </div>
+
+    <div class="card-body">
+      <!-- Search Form -->
+      <div *ngIf="searchFormGroup" class="mb-4">
         <form [formGroup]="searchFormGroup" (ngSubmit)="handleSearchCustomers()">
           <div class="input-group">
-            <label class="input-group-text">Keyword :</label>
-            <input type="text" formControlName="keyword" class="form-control">
-            <button class="btn btn-info">
-              <i class="bi bi-search"></i>
+            <span class="input-group-text bg-light">
+              <i class="bi bi-search text-muted"></i>
+            </span>
+            <input 
+              type="text" 
+              formControlName="keyword" 
+              class="form-control" 
+              placeholder="Search customers..."
+            >
+            <button class="btn btn-primary px-4">
+              Search
             </button>
           </div>
         </form>
       </div>
-      <table class="table table-bordered table-striped">
-        <thead>
-        <tr>
-          <th>Customer ID</th>
-          <th>Customer Name</th>
-          <th>Customer Email</th>
-          <th *ngIf="authService.roles.includes('ADMIN')">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let customer of customers | async">
-          <td>{{ customer.id }}</td>
-          <td>{{ customer.name }}</td>
-          <td>{{ customer.email }}</td>
-          <td class="" *ngIf="authService.roles.includes('ADMIN')">
-           <button class="btn btn-danger col col-md-3 m-2" (click)="handleDeleteCustomer(customer)" >
-             <i class="bi bi-trash"></i>
-           </button>
-            <button class="btn btn-success col-md-3 m-2" (click)="goToAccounts(customer)">
-              <i class="bi bi-bank"></i>
-            </button>
-            <button  class="btn btn-primary col-md-3 m-2"  (click)="goToEdit(customer)">
-              <i class="bi bi-pencil"></i>
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+
+      <!-- Customers Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th scope="col">#ID</th>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col" *ngIf="authService.roles.includes('ADMIN')" class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let customer of customers | async">
+              <td>{{ customer.id }}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-circle fs-4 me-2 text-muted"></i>
+                  {{ customer.name }}
+                </div>
+              </td>
+              <td>
+                <a href="mailto:{{ customer.email }}" class="text-decoration-none">
+                  {{ customer.email }}
+                </a>
+              </td>
+              <td *ngIf="authService.roles.includes('ADMIN')" class="text-center">
+                <div class="btn-group">
+                  <button 
+                    class="btn btn-outline-primary btn-sm" 
+                    (click)="goToAccounts(customer)" 
+                    title="View Accounts">
+                    <i class="bi bi-bank"></i>
+                  </button>
+                  <button 
+                    class="btn btn-outline-success btn-sm" 
+                    (click)="goToEdit(customer)"
+                    title="Edit Customer">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button 
+                    class="btn btn-outline-danger btn-sm" 
+                    (click)="handleDeleteCustomer(customer)"
+                    title="Delete Customer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="(customers | async)?.length === 0" class="text-center py-5">
+        <i class="bi bi-people fs-1 text-muted"></i>
+        <p class="mt-2 text-muted">No customers found</p>
+      </div>
     </div>
-
-
   </div>
 </div>

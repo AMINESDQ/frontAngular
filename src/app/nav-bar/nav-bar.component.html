@@ -1,37 +1,66 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Navbar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm sticky-top">
+  <div class="container">
+    <!-- Logo/Brand -->
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <i class="bi bi-bank me-2"></i>
+      <span>Digital Banking</span>
+    </a>
+
+    <!-- Mobile Toggle Button -->
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" 
+            aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
+    <!-- Navbar Content -->
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Main Navigation -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" routerLink="/">Home</a>
+          <a class="nav-link active" routerLink="/admin/home">
+            <i class="bi bi-house-door me-1"></i>Home
+          </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/admin/accounts">Accounts</a>
+          <a class="nav-link" routerLink="/admin/accounts">
+            <i class="bi bi-wallet2 me-1"></i>Accounts
+          </a>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Customers
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" 
+             role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-people me-1"></i>Customers
           </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <li><a class="dropdown-item" routerLink="/admin/customers">Search customers</a></li>
-            <li><a class="dropdown-item" *ngIf="authservice.roles.includes('ADMIN')" routerLink="/admin/new-customer">New customer</a></li>
+          <ul class="dropdown-menu dropdown-menu-end animate slideIn" aria-labelledby="navbarDropdown">
+            <li>
+              <a class="dropdown-item" routerLink="/admin/customers">
+                <i class="bi bi-search me-2"></i>Search customers
+              </a>
+            </li>
+            <li *ngIf="authservice.roles.includes('ADMIN')">
+              <a class="dropdown-item" routerLink="/admin/new-customer">
+                <i class="bi bi-person-plus me-2"></i>New customer
+              </a>
+            </li>
           </ul>
         </li>
       </ul>
 
-      <ul *ngIf="authservice.isAuthenticated" class="navbar">
-        <li class="nav me-3" >
-          {{this.authservice.username}}
+      <!-- User Menu -->
+      <ul *ngIf="authservice.isAuthenticated" class="navbar-nav ms-auto d-flex align-items-center">
+        <li class="nav-item me-3">
+          <span class="nav-link d-flex align-items-center">
+            <i class="bi bi-person-circle me-2"></i>
+            {{authservice.username}}
+          </span>
         </li>
-        <li class="nav">
-          <button (click)="handleLogout()" class="btn btn-success">Logout</button>
+        <li class="nav-item">
+          <button (click)="handleLogout()" class="btn btn-light">
+            <i class="bi bi-box-arrow-right me-2"></i>Logout
+          </button>
         </li>
       </ul>
-
     </div>
   </div>
 </nav>
