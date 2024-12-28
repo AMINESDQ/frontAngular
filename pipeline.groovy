@@ -1,9 +1,5 @@
 pipeline {
     agent any
-    
-    tools {
-        nodejs 'NodeJS'
-    }
 
     triggers {
         githubPush()
@@ -11,43 +7,61 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS = credentials('docker-credentials')
-        KUBE_FILES_PATH = 'kubernetes'
+        KUBE_FILES_PATH = '/home/azureuser/k8s_Repo'
+        DOCKER_IMAGE_NAME = 'sadiqmohamedamine/sadiqfront'
     }
 
     stages {
         stage('Checkout') {
             steps {
+                echo "Clonage du dépôt Git..."
                 checkout scm
             }
         }
 
-        stage('Build & Deploy Frontend') {
+        stage('Build & Push Docker Image') {
             when {
                 changeset "**/frontend/**"
             }
             steps {
                 dir('frontend') {
                     script {
-                        // Build et push de l'image Docker
-                        docker.build("sadiqmohamedamine/sadiqfront:${BUILD_NUMBER}")
+                        echo "Construction de l'image Docker..."
+                        def image = docker.build("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}")
+                        
+                        echo "Connexion au registre Docker..."
                         sh "echo $DOCKER_CREDENTIALS_PSW | docker login -u $DOCKER_CREDENTIALS_USR --password-stdin"
-                        sh "docker push sadiqmohamedamine/sadiqfront:${BUILD_NUMBER}"
-                        
-                        // Mise à jour du numéro de version dans le fichier de déploiement
-                        sh """
-                            sed -i 's|sadiqmohamedamine/sadiqfront:.*|sadiqmohamedamine/sadiqfront:${BUILD_NUMBER}|' \
-                            ../${KUBE_FILES_PATH}/frontend-deployment.yaml
-                        """
-                        
-                        // Déploiement avec minikube kubectl
-                        sh """
-                            minikube kubectl -- apply -f ../${KUBE_FILES_PATH}/frontend-deployment.yaml
-                            minikube kubectl -- apply -f ../${KUBE_FILES_PATH}/frontend-service.yaml
-                        """
 
-                        // Attendre que le déploiement soit prêt
-                        sh "minikube kubectl -- rollout status deployment/frontend"
+                        echo "Push de l'image Docker..."
+                        image.push()
                     }
+                }
+            }
+        }
+
+        stage('Update Kubernetes Deployment') {
+            when {
+                changeset "**/frontend/**"
+            }
+            steps {
+                script {
+                    echo "Mise à jour du fichier de déploiement Kubernetes..."
+                    sh """
+                        sed -i 's|sadiqmohamedamine/sadiqfront:.*|${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}|' \
+                        ${KUBE_FILES_PATH}/frontend-deployment.yaml
+                    """
+
+                    echo "Validation des fichiers YAML Kubernetes..."
+                    sh """
+                        minikube kubectl -- apply --dry-run=client -f ${KUBE_FILES_PATH}/frontend-deployment.yaml
+                        minikube kubectl -- apply --dry-run=client -f ${KUBE_FILES_PATH}/frontend-service.yaml
+                    """
+
+                    echo "Application des fichiers de configuration Kubernetes..."
+                    sh """
+                        minikube kubectl -- apply -f ${KUBE_FILES_PATH}/frontend-deployment.yaml
+                        minikube kubectl -- apply -f ${KUBE_FILES_PATH}/frontend-service.yaml
+                    """
                 }
             }
         }
@@ -55,27 +69,28 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 script {
-                    sh """
-                        echo "Vérification du déploiement frontend..."
-                        minikube kubectl -- get pods -l app=frontend
-                        minikube kubectl -- get service frontend
-                        
-                        echo "URL d'accès à l'application :"
-                        minikube kubectl -- get service frontend
-                        
-                        # Obtenir l'IP de Minikube
-                        echo "Minikube IP: \$(minikube ip)"
-                    """
-
-                    // Vérifier l'état des pods
+                    echo "Vérification de l'état des pods..."
                     def podStatus = sh(
                         script: 'minikube kubectl -- get pods -l app=frontend -o jsonpath="{.items[*].status.phase}"',
                         returnStdout: true
                     ).trim()
 
                     if (!podStatus.contains("Running")) {
-                        error "Les pods ne sont pas en état 'Running'. État actuel: ${podStatus}"
+                        error "Les pods ne sont pas en état 'Running'. État actuel : ${podStatus}"
                     }
+
+                    echo "Vérification des services Kubernetes..."
+                    sh "minikube kubectl -- get service frontend"
+
+                    def minikubeIP = sh(script: 'minikube ip', returnStdout: true).trim()
+                    def nodePort = sh(
+                        script: 'minikube kubectl -- get service frontend -o jsonpath="{.spec.ports[0].nodePort}"',
+                        returnStdout: true
+                    ).trim()
+
+                    echo "==================================="
+                    echo "Déploiement accessible sur : http://${minikubeIP}:${nodePort}"
+                    echo "==================================="
                 }
             }
         }
@@ -83,29 +98,13 @@ pipeline {
 
     post {
         success {
-            script {
-                // Obtenir l'IP de Minikube
-                def minikubeIP = sh(
-                    script: 'minikube ip',
-                    returnStdout: true
-                ).trim()
-
-                // Obtenir le port du service
-                def nodePort = sh(
-                    script: 'minikube kubectl -- get service frontend -o jsonpath="{.spec.ports[0].nodePort}"',
-                    returnStdout: true
-                ).trim()
-
-                echo "==================================="
-                echo "Déploiement terminé avec succès!"
-                echo "Accédez à l'application sur: http://${minikubeIP}:${nodePort}"
-                echo "==================================="
-            }
+            echo "Déploiement réussi."
         }
         failure {
             echo "Le déploiement a échoué. Vérifiez les logs pour plus de détails."
         }
         always {
+            echo "Nettoyage des fichiers temporaires..."
             cleanWs()
         }
     }
